@@ -1,0 +1,13 @@
+[Unit]
+Description=Service monitoring CPU temperature and Fan activity
+Requires=mosquitto.service
+After=mosquitto.service
+
+[Service]
+Type=notify
+ExecStart=/root/go/bin/rpi-fan-sensor
+WatchdogSec=30s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
