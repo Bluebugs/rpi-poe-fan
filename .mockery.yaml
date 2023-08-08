@@ -1,0 +1,30 @@
+testonly: True
+quiet: False
+disable-version-string: True
+with-expecter: True
+
+mockname: "Mock{{.InterfaceName}}"
+filename: "mock_{{.InterfaceName}}.go"
+dir: "mocks"
+outpkg: "mocks"
+
+packages:
+  github.com/eclipse/paho.mqtt.golang:
+    interfaces:
+      Client:
+      Token:
+      Message:
+  github.com/Bluebugs/rpi-poe-fan/pkg/fans:
+    config:
+      dir: "{{.InterfaceDir}}"
+      outpkg: "{{.PackageName}}"
+      inpackage: True
+    interfaces:
+      Fan:
+  github.com/Bluebugs/rpi-poe-fan/pkg/cpu:
+    config:
+      dir: "{{.InterfaceDir}}"
+      outpkg: "{{.PackageName}}"
+      inpackage: True
+    interfaces:
+      Temp:
