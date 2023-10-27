@@ -56,6 +56,8 @@ func (s *source) subscribe(sse *event.Event) error {
 		topic := msg.Topic()
 		id := topic[len("/rpi-poe-fan/") : len(topic)-len("/state")]
 
+		log.Print("Received message on topic: ", topic)
+
 		var rpi state
 		if err := json.Unmarshal(msg.Payload(), &rpi); err != nil {
 			log.Error().Err(err).Str("id", id).Msg("Malformed json payload")
@@ -67,12 +69,14 @@ func (s *source) subscribe(sse *event.Event) error {
 			log.Error().Err(err).Str("id", id).Str("Timestamp", rpi.Timestamp).Msg("Malformed timestamp in json payload")
 			return
 		}
+		rpi.realtime = t
 
 		if t.Add(5 * time.Minute).Before(time.Now()) {
 			log.Error().Str("id", id).Str("Timestamp", rpi.Timestamp).Msg("Timestamp in json payload is too old")
 			return
 		}
-		rpi.realtime = t
+
+		log.Print("realtime: ", rpi.realtime)
 
 		changed := false
 		if current, ok := s.rpis[id]; ok && current.Temperature != rpi.Temperature && current.FanSpeed != rpi.FanSpeed {

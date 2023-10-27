@@ -1,29 +1,23 @@
-//go:build e2e
-// +build e2e
-
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
-	"github.com/Bluebugs/rpi-poe-fan/pkg/test"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/playwright-community/playwright-go"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func Test_ViableOutput(t *testing.T) {
-	page, terminate := newPage(t)
-	defer terminate()
-
+func Test_JSONEndpoint(t *testing.T) {
 	client := mocks.NewMockClient(t)
 	token := mocks.NewMockToken(t)
 	msg := mocks.NewMockMessage(t)
@@ -75,60 +69,63 @@ func Test_ViableOutput(t *testing.T) {
 	msg.EXPECT().Topic().Return("/rpi-poe-fan/1/state").Once()
 	callback(client, msg)
 
-	// Wait for http service to be running
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Millisecond)
 
-	_, err := page.Goto("http://localhost:8080")
+	rpis := map[string]state{}
+
+	err := httpGet("http://localhost:8080/", &rpis)
 	assert.NoError(t, err)
 
-	_, err = page.Screenshot(playwright.PageScreenshotOptions{
-		Path: playwright.String(filepath.Join("testdata", "failed", "screenshot-index.png")),
-	})
+	assert.Len(t, rpis, 1)
+	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
+
+	err = httpGet("http://localhost:8080/entries", &rpis)
 	assert.NoError(t, err)
 
-	temp := page.Locator("#temp-1")
-	err = temp.WaitFor()
+	assert.Len(t, rpis, 1)
+	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
+
+	st := state{}
+	err = httpGet("http://localhost:8080/entry/1/json", &st)
 	assert.NoError(t, err)
 
-	test.VerifyImage(t, filepath.Join("testdata", "failed", "screenshot-index.png"))
-
-	assert.NoError(t, temp.Err())
-	text, err := temp.InnerText()
-	assert.NoError(t, err)
-	assert.Equal(t, "50.00°C", text)
-
-	fan := page.Locator("#fan-1")
-	assert.NoError(t, fan.Err())
-	text, err = fan.InnerText()
-	assert.NoError(t, err)
-	assert.Equal(t, "50%", text)
+	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, st)
 
 	cancel()
 	<-shutdown
 }
 
-func newPage(t *testing.T) (playwright.Page, func()) {
-	err := playwright.Install()
-	assert.NoError(t, err)
-
-	pw, err := playwright.Run()
-	assert.NoError(t, err)
-	assert.NotNil(t, pw)
-
-	browser, err := pw.Chromium.Launch()
-	assert.NoError(t, err)
-	assert.NotNil(t, browser)
-
-	page, err := browser.NewPage()
-	assert.NoError(t, err)
-	assert.NotNil(t, page)
-
-	err = page.SetViewportSize(1920, 1440)
-	assert.NoError(t, err)
-
-	return page, func() {
-		page.Close()
-		browser.Close()
-		pw.Stop()
+func httpGet(target string, object interface{}) error {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", target, nil)
+	if err != nil {
+		return err
 	}
+
+	req.Header.Set("Content-type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-type") != "application/json; charset=utf-8" {
+		return fmt.Errorf("unexpected content type: %s", resp.Header.Get("Content-type"))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(body, object); err != nil {
+		return err
+	}
+
+	return nil
 }

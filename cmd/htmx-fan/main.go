@@ -134,10 +134,10 @@ func serve(log zerolog.Logger, ctx context.Context, source *source) error {
 		c.HTML(http.StatusOK, "about", gin.H{})
 	})
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index", source.rpis)
+		render(c, "index", source.rpis)
 	})
 	r.GET("/entries", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "entries", source.rpis)
+		render(c, "entries", source.rpis)
 	})
 	r.POST("/entry/:id/boost", func(c *gin.Context) {
 		id := c.Param("id")
@@ -148,6 +148,17 @@ func serve(log zerolog.Logger, ctx context.Context, source *source) error {
 		<-token.Done()
 
 		c.String(http.StatusOK, "Boost")
+	})
+	r.GET("/entry/:id/json", func(c *gin.Context) {
+		id := c.Param("id")
+
+		rpi, ok := source.rpis[id]
+		if !ok {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		c.JSON(http.StatusOK, rpi)
 	})
 
 	r.GET("/entry/:id", event.HeadersMiddleware(), sse.Middleware(), func(c *gin.Context) {
@@ -219,4 +230,13 @@ func systemdStopping(log zerolog.Logger, ctx context.Context) {
 
 var htmlFunc = template.FuncMap{
 	"pass": func(elements ...any) []any { return elements },
+}
+
+func render(c *gin.Context, template string, obj any) {
+	switch c.GetHeader("Content-Type") {
+	case "application/json":
+		c.JSON(http.StatusOK, obj)
+	default:
+		c.HTML(http.StatusOK, template, obj)
+	}
 }
