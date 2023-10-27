@@ -1,0 +1,31 @@
+{{ define "title" }}Index page for RPi PoE Fan Controller{{ end }}
+
+{{ define "content" }}
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg w-full" hx-get="/entries" hx-trigger="every 120s" hx-swap="outerHTML">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    RaspBerry Pi
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Temperature
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Fan Speed
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    <span class="sr-only">Boost</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $id, $state := .}}
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" hx-ext="sse" sse-connect="/entry/{{ $id }}" sse-swap="Refresh">
+                {{ template "entry" (pass $id $state) }}
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+</div>
+{{ end }}
