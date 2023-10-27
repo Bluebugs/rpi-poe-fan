@@ -1,4 +1,4 @@
-package main
+package mqtthelper
 
 import (
 	"errors"
@@ -7,9 +7,9 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var errTimeout = errors.New("timeout")
+var ErrTimeout = errors.New("timeout")
 
-func connect(client mqtt.Client) error {
+func Connect(client mqtt.Client) error {
 	connection := client.Connect()
 	timeout := time.NewTicker(5 * time.Second)
 	defer timeout.Stop()
@@ -17,7 +17,7 @@ func connect(client mqtt.Client) error {
 	select {
 	case <-connection.Done():
 	case <-timeout.C:
-		return errTimeout
+		return ErrTimeout
 	}
 
 	if connection.Error() != nil {

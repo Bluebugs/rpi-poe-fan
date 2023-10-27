@@ -7,6 +7,7 @@ import (
 
 	"github.com/Bluebugs/rpi-poe-fan/pkg/cpu"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/fans"
+	mqtthelper "github.com/Bluebugs/rpi-poe-fan/pkg/mqtt-helper"
 	"github.com/coreos/go-systemd/daemon"
 
 	"github.com/denisbrodbeck/machineid"
@@ -25,7 +26,7 @@ func main() {
 	opts.AutoReconnect = true
 
 	client := mqtt.NewClient(opts)
-	if err = connect(client); err != nil {
+	if err := mqtthelper.Connect(client); err != nil {
 		log.Fatal("Failure to establish local MQTT connection:", err)
 	}
 	defer client.Disconnect(0)

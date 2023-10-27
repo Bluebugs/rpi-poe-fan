@@ -1,4 +1,4 @@
-package main
+package mqtthelper
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ func Test_ServiceConnect(t *testing.T) {
 	token.EXPECT().Done().Return(ch)
 	token.EXPECT().Error().Return(nil)
 
-	err := connect(client)
+	err := Connect(client)
 	assert.NoError(t, err)
 }
 
@@ -32,8 +32,8 @@ func Test_ServiceConnectTimeout(t *testing.T) {
 	client.EXPECT().Connect().Return(token).Once()
 	token.EXPECT().Done().Return(ch)
 
-	err := connect(client)
-	assert.ErrorIs(t, errTimeout, err)
+	err := Connect(client)
+	assert.ErrorIs(t, ErrTimeout, err)
 }
 
 func Test_ServiceConnectError(t *testing.T) {
@@ -49,6 +49,6 @@ func Test_ServiceConnectError(t *testing.T) {
 	token.EXPECT().Done().Return(ch)
 	token.EXPECT().Error().Return(errFake)
 
-	err := connect(client)
+	err := Connect(client)
 	assert.ErrorIs(t, errFake, err)
 }
