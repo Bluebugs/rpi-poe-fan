@@ -54,5 +54,6 @@ func main() {
 		}
 
 		time.Sleep(interval / 3)
+		daemon.SdNotify(false, daemon.SdNotifyWatchdog)
 	}
 }
