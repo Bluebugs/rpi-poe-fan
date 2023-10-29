@@ -31,13 +31,15 @@ type source struct {
 	rpis   map[string]state
 }
 
-func listen(log zerolog.Logger, server string) (*source, error) {
+func init() {
 	var err error
 	entry, err = template.New("refresh-entry").Funcs(htmlFunc).ParseFS(f, "templates/entry.html", "templates/refresh-entry.html")
 	if err != nil {
-		return nil, fmt.Errorf("failure to parse entry template: %w", err)
+		zerolog.DefaultContextLogger.Error().Err(err).Msg("Failure to parse templates refresh-entry")
 	}
+}
 
+func listen(log *zerolog.Logger, server string) (*source, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(server)
 	opts.SetClientID(os.Args[0])
@@ -95,7 +97,7 @@ func (s *source) subscribe(sse *event.Event) error {
 	return token.Error()
 }
 
-func (s *source) emit(log zerolog.Logger, id string, c *gin.Context) bool {
+func (s *source) emit(log *zerolog.Logger, id string, c *gin.Context) bool {
 	rpi, ok := s.rpis[id]
 	if !ok {
 		log.Error().Str("Id", id).Msg("Refresh not found")
@@ -112,6 +114,12 @@ func (s *source) emit(log zerolog.Logger, id string, c *gin.Context) bool {
 	}
 	c.SSEvent("Refresh", buf.String())
 	return true
+}
+
+func (s *source) boost(id string) error {
+	token := s.client.Publish("/rpi-poe-fan/"+id+"/speed", 0, true, "100")
+	<-token.Done()
+	return token.Error()
 }
 
 func (s *source) Close() {

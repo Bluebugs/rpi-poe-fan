@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -16,12 +15,9 @@ import (
 	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
 
 	"github.com/coreos/go-systemd/activation"
-	"github.com/gin-contrib/graceful"
 	"github.com/gin-contrib/logger"
-	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
 	notify "github.com/iguanesolutions/go-systemd/v5/notify"
-	watchdog "github.com/iguanesolutions/go-systemd/v5/notify/watchdog"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/journald"
 	"github.com/urfave/cli/v2"
@@ -30,9 +26,7 @@ import (
 //go:embed templates/*.html assets/*
 var f embed.FS
 
-func main() {
-	mqttServer := "tcp://localhost:1883"
-
+func init() {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
 	var writer io.Writer
@@ -45,6 +39,12 @@ func main() {
 	}
 	log := zerolog.New(writer).With().Timestamp().Logger()
 	zerolog.DefaultContextLogger = &log
+}
+
+func main() {
+	mqttServer := "tcp://localhost:1883"
+
+	log := zerolog.DefaultContextLogger
 
 	app := &cli.App{
 		Name:        "htmx-fan",
@@ -85,7 +85,7 @@ func main() {
 	}
 }
 
-func serve(log zerolog.Logger, ctx context.Context, source *source) error {
+func serve(log *zerolog.Logger, ctx context.Context, source *source) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -101,84 +101,19 @@ func serve(log zerolog.Logger, ctx context.Context, source *source) error {
 		return fmt.Errorf("failure to get systemd listeners: %w", err)
 	}
 
-	var opts []graceful.Option
-	for _, l := range listeners {
-		opts = append(opts, graceful.WithListener(l))
-	}
-
-	r, err := graceful.New(gin.New(), opts...)
+	r, err := NewEngine(listeners)
 	if err != nil {
 		return fmt.Errorf("failure to create gin graceful server: %w", err)
 	}
 
 	r.Use(logger.SetLogger())
-	mt := multitemplate.NewRenderer()
-	mt.AddFromFilesFuncs("index", htmlFunc, "templates/base.html", "templates/index.html", "templates/entry.html")
-	mt.AddFromFilesFuncs("entry", htmlFunc, "templates/refresh-entry.html", "templates/entry.html")
-	mt.AddFromFilesFuncs("entries", htmlFunc, "templates/entries.html", "templates/index.html", "templates/entry.html")
-	mt.AddFromFiles("about", "templates/base.html", "templates/about.html")
-	r.HTMLRender = mt
 
-	r.StaticFS("/public", http.FS(f))
+	InstantiateTemplate(r.Engine)
+	ServeStaticFile(r.Engine)
+	ServeDynamicPage(log, r.Engine, source, sse)
 
-	r.GET("favicon.ico", func(c *gin.Context) {
-		data, err := f.ReadFile("assets/mqtt-icon.svg")
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.Data(http.StatusOK, "image/svg+xml", data)
-	})
 	r.GET("/about", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "about", gin.H{})
-	})
-	r.GET("/", func(c *gin.Context) {
-		render(c, "index", source.rpis)
-	})
-	r.GET("/entries", func(c *gin.Context) {
-		render(c, "entries", source.rpis)
-	})
-	r.POST("/entry/:id/boost", func(c *gin.Context) {
-		id := c.Param("id")
-
-		log.Info().Str("Id", id).Msg("Boosting")
-
-		token := source.client.Publish("/rpi-poe-fan/"+id+"/speed", 0, true, "100")
-		<-token.Done()
-
-		c.String(http.StatusOK, "Boost")
-	})
-	r.GET("/entry/:id/json", func(c *gin.Context) {
-		id := c.Param("id")
-
-		rpi, ok := source.rpis[id]
-		if !ok {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		c.JSON(http.StatusOK, rpi)
-	})
-
-	r.GET("/entry/:id", event.HeadersMiddleware(), sse.Middleware(), func(c *gin.Context) {
-		id := c.Param("id")
-
-		ch, err := sse.GetChannel(c)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return
-		}
-		c.Stream(func(w io.Writer) bool {
-			msg, ok := <-ch
-			if !ok {
-				return false
-			}
-			if msg == id {
-				return source.emit(log, id, c)
-			}
-			return true
-		})
 	})
 
 	if notify.IsEnabled() {
@@ -194,49 +129,4 @@ func serve(log zerolog.Logger, ctx context.Context, source *source) error {
 		return fmt.Errorf("failure to run gin server: %w", err)
 	}
 	return nil
-}
-
-func systemdWatchdog(log zerolog.Logger, ctx context.Context) {
-	go func() {
-		w, err := watchdog.New()
-		if err != nil {
-			log.Info().Err(err).Msg("Failure to create systemd watchdog")
-			return
-		}
-
-		for {
-			select {
-			case <-w.NewTicker().C:
-				log.Info().Msg("Watchdog ping")
-				if err := w.SendHeartbeat(); err != nil {
-					log.Info().Err(err).Msg("Failure to send systemd watchdog heartbeat")
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-}
-
-func systemdStopping(log zerolog.Logger, ctx context.Context) {
-	go func() {
-		<-ctx.Done()
-		log.Info().Msg("Notifying systemd that service is stopping")
-		if err := notify.Stopping(); err != nil {
-			log.Info().Err(err).Msg("Failure to notify systemd that service is stopping")
-		}
-	}()
-}
-
-var htmlFunc = template.FuncMap{
-	"pass": func(elements ...any) []any { return elements },
-}
-
-func render(c *gin.Context, template string, obj any) {
-	switch c.GetHeader("Content-Type") {
-	case "application/json":
-		c.JSON(http.StatusOK, obj)
-	default:
-		c.HTML(http.StatusOK, template, obj)
-	}
 }

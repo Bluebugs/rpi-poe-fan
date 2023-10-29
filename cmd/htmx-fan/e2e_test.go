@@ -1,6 +1,3 @@
-//go:build e2e
-// +build e2e
-
 package main
 
 import (
@@ -64,7 +61,7 @@ func Test_ViableOutput(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(log, ctx, &s)
+		serve(&log, ctx, &s)
 		close(shutdown)
 	}()
 
@@ -81,21 +78,20 @@ func Test_ViableOutput(t *testing.T) {
 	_, err := page.Goto("http://localhost:8080")
 	assert.NoError(t, err)
 
+	temp := page.Locator("#temp-1")
+	err = temp.WaitFor()
+	assert.NoError(t, err)
+	assert.NoError(t, temp.Err())
+	text, err := temp.InnerText()
+	assert.NoError(t, err)
+	assert.Equal(t, "50.00°C", text)
+
 	_, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String(filepath.Join("testdata", "failed", "screenshot-index.png")),
 	})
 	assert.NoError(t, err)
 
-	temp := page.Locator("#temp-1")
-	err = temp.WaitFor()
-	assert.NoError(t, err)
-
 	test.VerifyImage(t, filepath.Join("testdata", "failed", "screenshot-index.png"))
-
-	assert.NoError(t, temp.Err())
-	text, err := temp.InnerText()
-	assert.NoError(t, err)
-	assert.Equal(t, "50.00°C", text)
 
 	fan := page.Locator("#fan-1")
 	assert.NoError(t, fan.Err())
@@ -103,8 +99,40 @@ func Test_ViableOutput(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "50%", text)
 
+	client.EXPECT().Publish("/rpi-poe-fan/1/speed", byte(0), true, "100").Return(token).Once()
+
+	boost := page.Locator("#boost-1")
+	assert.NoError(t, boost.Err())
+	err = boost.Click()
+	assert.NoError(t, err)
+
+	sseEvent := time.Now().UTC().Format(time.RFC3339)
+	msg.EXPECT().Payload().Return([]byte(fmt.Sprintf(`{"temperature": 20, "fanSpeed": 100, "timestamp": %q}`, sseEvent))).Once()
+	msg.EXPECT().Topic().Return("/rpi-poe-fan/1/state").Once()
+	callback(client, msg)
+
+	time.Sleep(1 * time.Second)
+
+	temp = page.Locator("#temp-1")
+	err = temp.WaitFor()
+	assert.NoError(t, err)
+	assert.NoError(t, temp.Err())
+	text, err = temp.InnerText()
+	assert.NoError(t, err)
+	assert.Equal(t, "20.00°C", text)
+
+	fan = page.Locator("#fan-1")
+	assert.NoError(t, fan.Err())
+	text, err = fan.InnerText()
+	assert.NoError(t, err)
+	assert.Equal(t, "100%", text)
+
 	cancel()
 	<-shutdown
+
+	client.AssertExpectations(t)
+	token.AssertExpectations(t)
+	msg.AssertExpectations(t)
 }
 
 func newPage(t *testing.T) (playwright.Page, func()) {

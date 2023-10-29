@@ -58,7 +58,7 @@ func Test_JSONEndpoint(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(log, ctx, &s)
+		serve(&log, ctx, &s)
 		close(shutdown)
 	}()
 
