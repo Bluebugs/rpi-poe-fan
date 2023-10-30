@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+cmd/rpi-poe-fan/rpi-poe-fan
+cmd/htmx-fan/htmx-fan
+
 # Test binary, built with `go test -c`
 *.test
 
