@@ -1,3 +1,6 @@
+//go:build e2e
+// +build e2e
+
 package main
 
 import (
@@ -11,6 +14,7 @@ import (
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/test"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/gin-contrib/graceful"
 	"github.com/playwright-community/playwright-go"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -61,7 +65,7 @@ func Test_ViableOutput(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(&log, ctx, &s)
+		serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
 		close(shutdown)
 	}()
 
@@ -75,7 +79,7 @@ func Test_ViableOutput(t *testing.T) {
 	// Wait for http service to be running
 	time.Sleep(1 * time.Second)
 
-	_, err := page.Goto("http://localhost:8080")
+	_, err := page.Goto("http://localhost:9980")
 	assert.NoError(t, err)
 
 	temp := page.Locator("#temp-1")

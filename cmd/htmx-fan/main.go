@@ -15,6 +15,7 @@ import (
 	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
 
 	"github.com/coreos/go-systemd/activation"
+	"github.com/gin-contrib/graceful"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	notify "github.com/iguanesolutions/go-systemd/v5/notify"
@@ -85,7 +86,7 @@ func main() {
 	}
 }
 
-func serve(log *zerolog.Logger, ctx context.Context, source *source) error {
+func serve(log *zerolog.Logger, ctx context.Context, source *source, options ...graceful.Option) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -101,7 +102,7 @@ func serve(log *zerolog.Logger, ctx context.Context, source *source) error {
 		return fmt.Errorf("failure to get systemd listeners: %w", err)
 	}
 
-	r, err := NewEngine(listeners)
+	r, err := NewEngine(listeners, options...)
 	if err != nil {
 		return fmt.Errorf("failure to create gin graceful server: %w", err)
 	}

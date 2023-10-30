@@ -12,6 +12,7 @@ import (
 
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/gin-contrib/graceful"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -58,7 +59,7 @@ func Test_JSONEndpoint(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(&log, ctx, &s)
+		serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
 		close(shutdown)
 	}()
 
@@ -73,20 +74,20 @@ func Test_JSONEndpoint(t *testing.T) {
 
 	rpis := map[string]state{}
 
-	err := httpGet("http://localhost:8080/", &rpis)
+	err := httpGet("http://localhost:9980/", &rpis)
 	assert.NoError(t, err)
 
 	assert.Len(t, rpis, 1)
 	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
 
-	err = httpGet("http://localhost:8080/entries", &rpis)
+	err = httpGet("http://localhost:9980/entries", &rpis)
 	assert.NoError(t, err)
 
 	assert.Len(t, rpis, 1)
 	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
 
 	st := state{}
-	err = httpGet("http://localhost:8080/entry/1/json", &st)
+	err = httpGet("http://localhost:9980/entry/1/json", &st)
 	assert.NoError(t, err)
 
 	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, st)

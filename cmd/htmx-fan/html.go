@@ -14,8 +14,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func NewEngine(listeners []net.Listener) (*graceful.Graceful, error) {
-	var opts []graceful.Option
+func NewEngine(listeners []net.Listener, options ...graceful.Option) (*graceful.Graceful, error) {
+	var opts []graceful.Option = options
 	for _, l := range listeners {
 		opts = append(opts, graceful.WithListener(l))
 	}
@@ -107,6 +107,7 @@ var htmlFunc = template.FuncMap{
 }
 
 func render(c *gin.Context, template string, obj any) {
+	fmt.Println("HEADER: ", c.GetHeader("Content-Type"))
 	switch c.GetHeader("Content-Type") {
 	case "application/json":
 		c.JSON(http.StatusOK, obj)
