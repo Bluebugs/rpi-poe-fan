@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	_ "image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,8 +39,9 @@ func VerifyImage(t *testing.T, resultPath string) {
 		return
 	}
 
-	ratio := compare(masterPixels, resultPixels)
-	assert.LessOrEqual(t, ratio, 1)
+	totalError := compare(masterPixels, resultPixels, 0.05)
+	fmt.Println("overall", totalError)
+	assert.Equal(t, float64(0), totalError)
 
 	if !t.Failed() {
 		os.Remove(resultPath)
@@ -78,19 +80,22 @@ func pixels(i image.Image) ([]uint8, error) {
 	}
 }
 
-func compare(img1, img2 []uint8) int {
-	overallChange := 0
+func compare(img1, img2 []uint8, authorizedComponentError float32) float64 {
+	overallChange := int64(0)
 
 	for i := 0; i < len(img1); i++ {
-		overallChange += diffUInt8(img1[i], img2[i])
+		overallChange += diffUInt8(img1[i], img2[i], authorizedComponentError)
 	}
 
-	return 100 * overallChange / len(img1)
+	return math.Sqrt(float64(overallChange)) / float64(len(img1))
 }
 
-func diffUInt8(x, y uint8) int {
-	if x != y {
-		return 1
+func diffUInt8(x, y uint8, authorizedComponentError float32) int64 {
+	delta := float32(x - y)
+	pow := delta * delta
+	percentage := pow / float32(255*255)
+	if percentage > authorizedComponentError {
+		return int64(pow)
 	}
 	return 0
 }
