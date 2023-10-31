@@ -144,7 +144,7 @@ func newPage(t *testing.T) (playwright.Page, func()) {
 	assert.NoError(t, err)
 	assert.NotNil(t, pw)
 
-	browser, err := pw.Chromium.Launch()
+	browser, err := pw.Firefox.Launch()
 	assert.NoError(t, err)
 	assert.NotNil(t, browser)
 
