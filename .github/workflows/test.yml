@@ -30,6 +30,7 @@ jobs:
         if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; fi
 
     - name: Update PR Coverage
-      uses: shogo82148/actions-goveralls@v1
+      uses: coverallsapp/github-action@v2.2.3
       with:
-        path-to-profile: coverage.out
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        file: coverage.out
