@@ -63,7 +63,7 @@ func Test_ViableOutput(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
+		_ = serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
 		close(shutdown)
 	}()
 
@@ -159,6 +159,6 @@ func newPage(t *testing.T) (playwright.Page, func()) {
 	return page, func() {
 		page.Close()
 		browser.Close()
-		pw.Stop()
+		_ = pw.Stop()
 	}
 }

@@ -47,13 +47,13 @@ func main() {
 		interval = 3 * time.Second
 	}
 
-	daemon.SdNotify(false, daemon.SdNotifyReady)
+	_, _ = daemon.SdNotify(false, daemon.SdNotifyReady)
 	for {
 		if err := publish(client, id, t, f); err != nil {
 			log.Println(err)
 		}
 
 		time.Sleep(interval / 3)
-		daemon.SdNotify(false, daemon.SdNotifyWatchdog)
+		_, _ = daemon.SdNotify(false, daemon.SdNotifyWatchdog)
 	}
 }

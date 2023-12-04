@@ -45,7 +45,7 @@ func ServeDynamicPage(log *zerolog.Logger, r *gin.Engine, source *source, sse *e
 
 		err := source.boost(id)
 		if err != nil {
-			c.Error(err)
+			_ = c.Error(err)
 		} else {
 			c.String(http.StatusOK, "Boost")
 		}
@@ -93,7 +93,7 @@ func ServeAPI(log *zerolog.Logger, r *gin.Engine, source *source) {
 
 		err := source.boost(id)
 		if err != nil {
-			c.Error(err)
+			_ = c.Error(err)
 		} else {
 			c.String(http.StatusOK, "Boost")
 		}

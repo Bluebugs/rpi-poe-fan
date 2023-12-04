@@ -91,7 +91,10 @@ func (s *source) emit(log *zerolog.Logger, id string, c *gin.Context) bool {
 
 	var buf bytes.Buffer
 
-	templates.Entry(id, rpi.Temperature, rpi.FanSpeed).Render(context.Background(), &buf)
+	if err := templates.Entry(id, rpi.Temperature, rpi.FanSpeed).Render(context.Background(), &buf); err != nil {
+		log.Error().Err(err).Str("Id", id).Msg("Error rendering template")
+	}
+
 	c.SSEvent("Refresh", buf.String())
 	return true
 }

@@ -60,7 +60,7 @@ func Test_JSONEndpoint(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(&log, ctx, &s, graceful.WithAddr("localhost:9080"))
+		_ = serve(&log, ctx, &s, graceful.WithAddr("localhost:9080"))
 		close(shutdown)
 	}()
 

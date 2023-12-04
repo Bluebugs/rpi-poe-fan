@@ -10,7 +10,7 @@ import (
 func APIEndpoints(ctx *gin.Context) {
 	if !strings.HasSuffix(ctx.Request.URL.Path, "/api/") &&
 		ctx.GetHeader("Content-Type") == "application/json" {
-		ctx.Error(fmt.Errorf("invalid content type"))
+		_ = ctx.Error(fmt.Errorf("invalid content type"))
 		return
 	}
 	ctx.Next()
