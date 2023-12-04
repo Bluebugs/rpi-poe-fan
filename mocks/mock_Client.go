@@ -58,6 +58,10 @@ func (_c *MockClient_AddRoute_Call) RunAndReturn(run func(string, mqtt.MessageHa
 func (_m *MockClient) Connect() mqtt.Token {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Connect")
+	}
+
 	var r0 mqtt.Token
 	if rf, ok := ret.Get(0).(func() mqtt.Token); ok {
 		r0 = rf()
@@ -134,6 +138,10 @@ func (_c *MockClient_Disconnect_Call) RunAndReturn(run func(uint)) *MockClient_D
 func (_m *MockClient) IsConnected() bool {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for IsConnected")
+	}
+
 	var r0 bool
 	if rf, ok := ret.Get(0).(func() bool); ok {
 		r0 = rf()
@@ -174,6 +182,10 @@ func (_c *MockClient_IsConnected_Call) RunAndReturn(run func() bool) *MockClient
 // IsConnectionOpen provides a mock function with given fields:
 func (_m *MockClient) IsConnectionOpen() bool {
 	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsConnectionOpen")
+	}
 
 	var r0 bool
 	if rf, ok := ret.Get(0).(func() bool); ok {
@@ -216,6 +228,10 @@ func (_c *MockClient_IsConnectionOpen_Call) RunAndReturn(run func() bool) *MockC
 func (_m *MockClient) OptionsReader() mqtt.ClientOptionsReader {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for OptionsReader")
+	}
+
 	var r0 mqtt.ClientOptionsReader
 	if rf, ok := ret.Get(0).(func() mqtt.ClientOptionsReader); ok {
 		r0 = rf()
@@ -256,6 +272,10 @@ func (_c *MockClient_OptionsReader_Call) RunAndReturn(run func() mqtt.ClientOpti
 // Publish provides a mock function with given fields: topic, qos, retained, payload
 func (_m *MockClient) Publish(topic string, qos byte, retained bool, payload interface{}) mqtt.Token {
 	ret := _m.Called(topic, qos, retained, payload)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Publish")
+	}
 
 	var r0 mqtt.Token
 	if rf, ok := ret.Get(0).(func(string, byte, bool, interface{}) mqtt.Token); ok {
@@ -304,6 +324,10 @@ func (_c *MockClient_Publish_Call) RunAndReturn(run func(string, byte, bool, int
 func (_m *MockClient) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) mqtt.Token {
 	ret := _m.Called(topic, qos, callback)
 
+	if len(ret) == 0 {
+		panic("no return value specified for Subscribe")
+	}
+
 	var r0 mqtt.Token
 	if rf, ok := ret.Get(0).(func(string, byte, mqtt.MessageHandler) mqtt.Token); ok {
 		r0 = rf(topic, qos, callback)
@@ -349,6 +373,10 @@ func (_c *MockClient_Subscribe_Call) RunAndReturn(run func(string, byte, mqtt.Me
 // SubscribeMultiple provides a mock function with given fields: filters, callback
 func (_m *MockClient) SubscribeMultiple(filters map[string]byte, callback mqtt.MessageHandler) mqtt.Token {
 	ret := _m.Called(filters, callback)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SubscribeMultiple")
+	}
 
 	var r0 mqtt.Token
 	if rf, ok := ret.Get(0).(func(map[string]byte, mqtt.MessageHandler) mqtt.Token); ok {
@@ -400,6 +428,10 @@ func (_m *MockClient) Unsubscribe(topics ...string) mqtt.Token {
 	var _ca []interface{}
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Unsubscribe")
+	}
 
 	var r0 mqtt.Token
 	if rf, ok := ret.Get(0).(func(...string) mqtt.Token); ok {

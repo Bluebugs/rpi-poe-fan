@@ -21,6 +21,10 @@ func (_m *MockTemp) EXPECT() *MockTemp_Expecter {
 func (_m *MockTemp) Read() (float32, error) {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Read")
+	}
+
 	var r0 float32
 	var r1 error
 	if rf, ok := ret.Get(0).(func() (float32, error)); ok {

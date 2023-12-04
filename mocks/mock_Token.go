@@ -25,6 +25,10 @@ func (_m *MockToken) EXPECT() *MockToken_Expecter {
 func (_m *MockToken) Done() <-chan struct{} {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Done")
+	}
+
 	var r0 <-chan struct{}
 	if rf, ok := ret.Get(0).(func() <-chan struct{}); ok {
 		r0 = rf()
@@ -68,6 +72,10 @@ func (_c *MockToken_Done_Call) RunAndReturn(run func() <-chan struct{}) *MockTok
 func (_m *MockToken) Error() error {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Error")
+	}
+
 	var r0 error
 	if rf, ok := ret.Get(0).(func() error); ok {
 		r0 = rf()
@@ -109,6 +117,10 @@ func (_c *MockToken_Error_Call) RunAndReturn(run func() error) *MockToken_Error_
 func (_m *MockToken) Wait() bool {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Wait")
+	}
+
 	var r0 bool
 	if rf, ok := ret.Get(0).(func() bool); ok {
 		r0 = rf()
@@ -149,6 +161,10 @@ func (_c *MockToken_Wait_Call) RunAndReturn(run func() bool) *MockToken_Wait_Cal
 // WaitTimeout provides a mock function with given fields: _a0
 func (_m *MockToken) WaitTimeout(_a0 time.Duration) bool {
 	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WaitTimeout")
+	}
 
 	var r0 bool
 	if rf, ok := ret.Get(0).(func(time.Duration) bool); ok {

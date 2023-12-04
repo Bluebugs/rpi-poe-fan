@@ -53,6 +53,10 @@ func (_c *MockMessage_Ack_Call) RunAndReturn(run func()) *MockMessage_Ack_Call {
 func (_m *MockMessage) Duplicate() bool {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Duplicate")
+	}
+
 	var r0 bool
 	if rf, ok := ret.Get(0).(func() bool); ok {
 		r0 = rf()
@@ -94,6 +98,10 @@ func (_c *MockMessage_Duplicate_Call) RunAndReturn(run func() bool) *MockMessage
 func (_m *MockMessage) MessageID() uint16 {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for MessageID")
+	}
+
 	var r0 uint16
 	if rf, ok := ret.Get(0).(func() uint16); ok {
 		r0 = rf()
@@ -134,6 +142,10 @@ func (_c *MockMessage_MessageID_Call) RunAndReturn(run func() uint16) *MockMessa
 // Payload provides a mock function with given fields:
 func (_m *MockMessage) Payload() []byte {
 	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Payload")
+	}
 
 	var r0 []byte
 	if rf, ok := ret.Get(0).(func() []byte); ok {
@@ -178,6 +190,10 @@ func (_c *MockMessage_Payload_Call) RunAndReturn(run func() []byte) *MockMessage
 func (_m *MockMessage) Qos() byte {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Qos")
+	}
+
 	var r0 byte
 	if rf, ok := ret.Get(0).(func() byte); ok {
 		r0 = rf()
@@ -219,6 +235,10 @@ func (_c *MockMessage_Qos_Call) RunAndReturn(run func() byte) *MockMessage_Qos_C
 func (_m *MockMessage) Retained() bool {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Retained")
+	}
+
 	var r0 bool
 	if rf, ok := ret.Get(0).(func() bool); ok {
 		r0 = rf()
@@ -259,6 +279,10 @@ func (_c *MockMessage_Retained_Call) RunAndReturn(run func() bool) *MockMessage_
 // Topic provides a mock function with given fields:
 func (_m *MockMessage) Topic() string {
 	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Topic")
+	}
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func() string); ok {

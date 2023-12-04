@@ -21,6 +21,10 @@ func (_m *MockFan) EXPECT() *MockFan_Expecter {
 func (_m *MockFan) Control() (ControlMode, error) {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Control")
+	}
+
 	var r0 ControlMode
 	var r1 error
 	if rf, ok := ret.Get(0).(func() (ControlMode, error)); ok {
@@ -72,6 +76,10 @@ func (_c *MockFan_Control_Call) RunAndReturn(run func() (ControlMode, error)) *M
 func (_m *MockFan) Name() string {
 	ret := _m.Called()
 
+	if len(ret) == 0 {
+		panic("no return value specified for Name")
+	}
+
 	var r0 string
 	if rf, ok := ret.Get(0).(func() string); ok {
 		r0 = rf()
@@ -112,6 +120,10 @@ func (_c *MockFan_Name_Call) RunAndReturn(run func() string) *MockFan_Name_Call 
 // SetSpeed provides a mock function with given fields: percentage
 func (_m *MockFan) SetSpeed(percentage uint8) error {
 	ret := _m.Called(percentage)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetSpeed")
+	}
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(uint8) error); ok {
@@ -154,6 +166,10 @@ func (_c *MockFan_SetSpeed_Call) RunAndReturn(run func(uint8) error) *MockFan_Se
 // Speed provides a mock function with given fields:
 func (_m *MockFan) Speed() (uint8, error) {
 	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Speed")
+	}
 
 	var r0 uint8
 	var r1 error
@@ -205,6 +221,10 @@ func (_c *MockFan_Speed_Call) RunAndReturn(run func() (uint8, error)) *MockFan_S
 // String provides a mock function with given fields:
 func (_m *MockFan) String() string {
 	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for String")
+	}
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func() string); ok {
