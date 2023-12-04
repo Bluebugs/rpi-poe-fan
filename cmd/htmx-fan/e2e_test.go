@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/test"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -28,7 +29,7 @@ func Test_ViableOutput(t *testing.T) {
 
 	s := source{
 		client: client,
-		rpis:   make(map[string]state),
+		rpis:   make(map[string]types.State),
 	}
 
 	writer := zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {

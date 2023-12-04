@@ -24,7 +24,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-//go:embed templates/*.html assets/*
+//go:embed assets/*
 var f embed.FS
 
 func init() {
@@ -108,10 +108,12 @@ func serve(log *zerolog.Logger, ctx context.Context, source *source, options ...
 	}
 
 	r.Use(logger.SetLogger())
+	r.Use(APIEndpoints)
 
 	InstantiateTemplate(r.Engine)
 	ServeStaticFile(r.Engine)
 	ServeDynamicPage(log, r.Engine, source, sse)
+	ServeAPI(log, r.Engine, source)
 
 	r.GET("/about", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "about", gin.H{})

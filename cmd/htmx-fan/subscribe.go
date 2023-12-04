@@ -2,41 +2,26 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"os"
 	"time"
 
+	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/templates"
+	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
 	mqtthelper "github.com/Bluebugs/rpi-poe-fan/pkg/mqtt-helper"
-	"github.com/gin-gonic/gin"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-var entry *template.Template
-
-type state struct {
-	Temperature float32
-	FanSpeed    uint8
-	Timestamp   string
-	realtime    time.Time
-}
-
 type source struct {
 	client mqtt.Client
-	rpis   map[string]state
-}
-
-func init() {
-	var err error
-	entry, err = template.New("refresh-entry").Funcs(htmlFunc).ParseFS(f, "templates/entry.html", "templates/refresh-entry.html")
-	if err != nil {
-		zerolog.DefaultContextLogger.Error().Err(err).Msg("Failure to parse templates refresh-entry")
-	}
+	rpis   map[string]types.State
 }
 
 func listen(log *zerolog.Logger, server string) (*source, error) {
@@ -50,7 +35,7 @@ func listen(log *zerolog.Logger, server string) (*source, error) {
 		return nil, fmt.Errorf("error establishing connection to mqtt server: %w", err)
 	}
 
-	return &source{client: client, rpis: make(map[string]state)}, nil
+	return &source{client: client, rpis: make(map[string]types.State)}, nil
 }
 
 func (s *source) subscribe(sse *event.Event) error {
@@ -60,7 +45,7 @@ func (s *source) subscribe(sse *event.Event) error {
 
 		log.Print("Received message on topic: ", topic)
 
-		var rpi state
+		var rpi types.State
 		if err := json.Unmarshal(msg.Payload(), &rpi); err != nil {
 			log.Error().Err(err).Str("id", id).Msg("Malformed json payload")
 			return
@@ -71,14 +56,14 @@ func (s *source) subscribe(sse *event.Event) error {
 			log.Error().Err(err).Str("id", id).Str("Timestamp", rpi.Timestamp).Msg("Malformed timestamp in json payload")
 			return
 		}
-		rpi.realtime = t
+		rpi.Realtime = t
 
 		if t.Add(5 * time.Minute).Before(time.Now()) {
 			log.Error().Str("id", id).Str("Timestamp", rpi.Timestamp).Msg("Timestamp in json payload is too old")
 			return
 		}
 
-		log.Print("realtime: ", rpi.realtime)
+		log.Print("realtime: ", rpi.Realtime)
 
 		changed := false
 		if current, ok := s.rpis[id]; ok && current.Temperature != rpi.Temperature && current.FanSpeed != rpi.FanSpeed {
@@ -105,13 +90,8 @@ func (s *source) emit(log *zerolog.Logger, id string, c *gin.Context) bool {
 	}
 
 	var buf bytes.Buffer
-	if err := entry.Execute(&buf, struct {
-		Id    string
-		State state
-	}{id, rpi}); err != nil {
-		log.Error().Err(err).Str("Id", id).Msg("Failure to execute entry template")
-		return false
-	}
+
+	templates.Entry(id, rpi.Temperature, rpi.FanSpeed).Render(context.Background(), &buf)
 	c.SSEvent("Refresh", buf.String())
 	return true
 }

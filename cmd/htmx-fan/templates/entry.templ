@@ -1,0 +1,26 @@
+package templates
+
+import "fmt"
+
+templ Entry(Id string, Temperature float32, FanSpeed uint8) {
+	<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+		{ Id }
+	</th>
+	<td id={ fmt.Sprintf("temp-%s", Id) } class="px-6 py-4">
+		{ fmt.Sprintf("%.02f°C", Temperature) }
+	</td>
+	<td id={ fmt.Sprintf("fan-%s", Id) } class="px-6 py-4">
+		{ fmt.Sprintf("%v%%", FanSpeed) }
+	</td>
+	<td class="px-6 py-4 text-right">
+		<button
+ 			id={ fmt.Sprintf("boost-%s", Id) }
+ 			type="button"
+ 			hx-post={ fmt.Sprintf("/entry/%s/boost", Id) }
+ 			hx-swap="none"
+ 			class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+		>
+			Boost
+		</button>
+	</td>
+}

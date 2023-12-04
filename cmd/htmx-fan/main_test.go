@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-contrib/graceful"
@@ -25,7 +26,7 @@ func Test_JSONEndpoint(t *testing.T) {
 
 	s := source{
 		client: client,
-		rpis:   make(map[string]state),
+		rpis:   make(map[string]types.State),
 	}
 
 	writer := zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
@@ -59,38 +60,33 @@ func Test_JSONEndpoint(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
+		serve(&log, ctx, &s, graceful.WithAddr("localhost:9080"))
 		close(shutdown)
 	}()
 
 	<-done
 
 	now := time.Now().UTC().Format(time.RFC3339)
+	realtime, _ := time.Parse(time.RFC3339, now)
 	msg.EXPECT().Payload().Return([]byte(fmt.Sprintf(`{"temperature": 50, "fanSpeed": 50, "timestamp": %q}`, now))).Once()
 	msg.EXPECT().Topic().Return("/rpi-poe-fan/1/state").Once()
 	callback(client, msg)
 
 	time.Sleep(10 * time.Millisecond)
 
-	rpis := map[string]state{}
+	rpis := map[string]types.State{}
 
-	err := httpGet("http://localhost:9980/", &rpis)
+	err := httpGet("http://localhost:9080/api/entries", &rpis)
 	assert.NoError(t, err)
 
 	assert.Len(t, rpis, 1)
-	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
+	assert.Equal(t, types.State{Temperature: 50, FanSpeed: 50, Timestamp: now, Realtime: realtime}, rpis["1"])
 
-	err = httpGet("http://localhost:9980/entries", &rpis)
+	st := types.State{}
+	err = httpGet("http://localhost:9080/api/entry/1", &st)
 	assert.NoError(t, err)
 
-	assert.Len(t, rpis, 1)
-	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, rpis["1"])
-
-	st := state{}
-	err = httpGet("http://localhost:9980/entry/1/json", &st)
-	assert.NoError(t, err)
-
-	assert.Equal(t, state{Temperature: 50, FanSpeed: 50, Timestamp: now}, st)
+	assert.Equal(t, types.State{Temperature: 50, FanSpeed: 50, Timestamp: now, Realtime: realtime}, st)
 
 	cancel()
 	<-shutdown
