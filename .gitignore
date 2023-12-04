@@ -22,3 +22,6 @@ cmd/htmx-fan/htmx-fan
 
 # Go workspace file
 go.work
+
+cmd/htmx-fan/htmx-fan
+cmd/rpi-fan-sensor/rpi-fan-sensor
