@@ -28,8 +28,8 @@ github.com/eclipse/paho.mqtt.golang v1.4.3 h1:2kwcUGn8seMUfWndX0hGbvH8r7crgcJguQ
 github.com/eclipse/paho.mqtt.golang v1.4.3/go.mod h1:CSYvoAlsMkhYOXh/oKyxa8EcBci6dVkLCbo5tTC1RIE=
 github.com/gabriel-vasile/mimetype v1.4.2 h1:w5qFW6JKBz9Y393Y4q372O9A7cUSequkh1Q7OhCmWKU=
 github.com/gabriel-vasile/mimetype v1.4.2/go.mod h1:zApsH/mKG4w07erKIaJPFiX0Tsq9BFQgN3qGY5GnNgA=
-github.com/gin-contrib/graceful v0.0.0-20230904152018-e56ed94cd808 h1:FWLRw/61ras/SCc7OdLlg/MyS+MDx6syQhIBfkfznUc=
-github.com/gin-contrib/graceful v0.0.0-20230904152018-e56ed94cd808/go.mod h1:eRZFrgWTLneuj4V0sNAN5+eNRcnZNSTsAFC+69voi78=
+github.com/gin-contrib/graceful v0.1.0 h1:kBWTKBx+xwYTS9Dklyps+S45zJAHdezlXzUnPsRW2PE=
+github.com/gin-contrib/graceful v0.1.0/go.mod h1:aKN7g7ftZhE1C7DQ+11OwqZKVfcmLrFCEC+fDG3Fi5E=
 github.com/gin-contrib/logger v0.2.6 h1:u+tvbiQhGEyuJgZSHNja3WD800ILduVyk5xKop160dw=
 github.com/gin-contrib/logger v0.2.6/go.mod h1:ZDkY/xiMqbZdz83enCHjMqxJUFRzB8bq0kjyMmjr3qU=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
