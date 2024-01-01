@@ -16,7 +16,7 @@ require (
 	github.com/playwright-community/playwright-go v0.4001.0
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.27.1
 )
 
 require (
