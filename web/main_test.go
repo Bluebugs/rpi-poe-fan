@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
+	"github.com/Bluebugs/rpi-poe-fan/web/types"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-contrib/graceful"
 	"github.com/rs/zerolog"
@@ -60,7 +60,7 @@ func Test_JSONEndpoint(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
-		_ = serve(&log, ctx, &s, graceful.WithAddr("localhost:9080"))
+		_ = Serve(&log, ctx, &s, func() error { return nil }, graceful.WithAddr("localhost:9080"))
 		close(shutdown)
 	}()
 

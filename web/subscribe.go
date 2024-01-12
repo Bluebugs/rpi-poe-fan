@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"bytes"
@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/templates"
-	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
 	mqtthelper "github.com/Bluebugs/rpi-poe-fan/pkg/mqtt-helper"
+	"github.com/Bluebugs/rpi-poe-fan/web/templates"
+	"github.com/Bluebugs/rpi-poe-fan/web/types"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ type source struct {
 	rpis   map[string]types.State
 }
 
-func listen(log *zerolog.Logger, server string) (*source, error) {
+func Listen(server string) (*source, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(server)
 	opts.SetClientID(os.Args[0])

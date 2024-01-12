@@ -1,7 +1,7 @@
 //go:build e2e
 // +build e2e
 
-package main
+package web
 
 import (
 	"context"
@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/types"
 	"github.com/Bluebugs/rpi-poe-fan/mocks"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/test"
+	"github.com/Bluebugs/rpi-poe-fan/web/types"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-contrib/graceful"
 	"github.com/playwright-community/playwright-go"
@@ -66,7 +66,11 @@ func Test_ViableOutput(t *testing.T) {
 	client.EXPECT().Disconnect(uint(0)).Return().Once()
 
 	go func() {
+<<<<<<< HEAD:cmd/htmx-fan/integration_test.go
 		_ = serve(&log, ctx, &s, graceful.WithAddr("localhost:9980"))
+=======
+		Serve(&log, ctx, &s, func() error { return nil }, graceful.WithAddr("localhost:9980"))
+>>>>>>> 172f677 (Move htmx-fan web logic to its own package for easier end to end tests.):web/integration_test.go
 		close(shutdown)
 	}()
 

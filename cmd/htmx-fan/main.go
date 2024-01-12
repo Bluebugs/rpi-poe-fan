@@ -2,30 +2,19 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"os/signal"
 	"runtime/debug"
-	"syscall"
 	"time"
 
-	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
+	"github.com/Bluebugs/rpi-poe-fan/web"
 
-	"github.com/coreos/go-systemd/activation"
-	"github.com/gin-contrib/graceful"
-	"github.com/gin-contrib/logger"
-	"github.com/gin-gonic/gin"
 	notify "github.com/iguanesolutions/go-systemd/v5/notify"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/journald"
 	"github.com/urfave/cli/v2"
 )
-
-//go:embed assets/*
-var f embed.FS
 
 func init() {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -60,17 +49,30 @@ func main() {
 				Destination: &mqttServer,
 			},
 		},
-		Action: func(ctx *cli.Context) error {
-			if ctx.NArg() != 0 {
+		Action: func(c *cli.Context) error {
+			if c.NArg() != 0 {
 				return cli.Exit("unecessary parameters specified", 1)
 			}
 
-			source, err := listen(log, mqttServer)
+			source, err := web.Listen(mqttServer)
 			if err != nil {
 				return err
 			}
 
-			return serve(log, context.Background(), source)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			return web.Serve(log, ctx, source, func() error {
+				if notify.IsEnabled() {
+					if err := notify.Ready(); err != nil {
+						return fmt.Errorf("failure to notify systemd that service is ready: %w", err)
+					}
+				}
+
+				systemdWatchdog(log, ctx)
+				systemdStopping(log, ctx)
+				return nil
+			})
 		},
 	}
 
@@ -84,52 +86,4 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-func serve(log *zerolog.Logger, ctx context.Context, source *source, options ...graceful.Option) error {
-	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
-	sse := event.New()
-
-	if err := source.subscribe(sse); err != nil {
-		return err
-	}
-	defer source.Close()
-
-	listeners, err := activation.Listeners()
-	if err != nil {
-		return fmt.Errorf("failure to get systemd listeners: %w", err)
-	}
-
-	r, err := NewEngine(listeners, options...)
-	if err != nil {
-		return fmt.Errorf("failure to create gin graceful server: %w", err)
-	}
-
-	r.Use(logger.SetLogger())
-	r.Use(APIEndpoints)
-
-	InstantiateTemplate(r.Engine)
-	ServeStaticFile(r.Engine)
-	ServeDynamicPage(log, r.Engine, source, sse)
-	ServeAPI(log, r.Engine, source)
-
-	r.GET("/about", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "about", gin.H{})
-	})
-
-	if notify.IsEnabled() {
-		if err := notify.Ready(); err != nil {
-			return fmt.Errorf("failure to notify systemd that service is ready: %w", err)
-		}
-	}
-
-	systemdWatchdog(log, ctx)
-	systemdStopping(log, ctx)
-
-	if err := r.RunWithContext(ctx); err != nil && err != context.Canceled {
-		return fmt.Errorf("failure to run gin server: %w", err)
-	}
-	return nil
 }

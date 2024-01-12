@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/Bluebugs/rpi-poe-fan/cmd/htmx-fan/templates"
 	"github.com/Bluebugs/rpi-poe-fan/pkg/event"
+	"github.com/Bluebugs/rpi-poe-fan/web/templates"
 	"github.com/gin-contrib/graceful"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
