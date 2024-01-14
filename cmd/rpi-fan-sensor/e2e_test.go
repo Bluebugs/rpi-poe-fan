@@ -59,7 +59,14 @@ func Test_End2End(t *testing.T) {
 
 	var eg errgroup.Group
 	eg.Go(func() error {
-		return serve(mqttServer, "1", fan, temp, func() { <-stop }, func() { <-stop })
+		return serve(mqttServer, "1", fan, temp, func() { <-stop }, func() error {
+			select {
+			case <-stop:
+				return nil
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		})
 	})
 
 	eg.Go(func() error {
@@ -112,6 +119,9 @@ func Test_End2End(t *testing.T) {
 			test.VerifyImage(t, filepath.Join("testdata", "failed", "screenshot-"+name+".png"))
 		})
 	}
+
+	cancel()
+	assert.NoError(t, eg.Wait())
 }
 
 func setupMqttServer(ctx context.Context) (string, func(), error) {
@@ -139,7 +149,7 @@ func setupMqttServer(ctx context.Context) (string, func(), error) {
 	cancel := true
 	defer func() {
 		if cancel {
-			mqttContainer.Terminate(ctx)
+			_ = mqttContainer.Terminate(ctx)
 		}
 	}()
 
@@ -159,9 +169,9 @@ func setupMqttServer(ctx context.Context) (string, func(), error) {
 		if err == nil {
 			defer stream.Close()
 			b, _ := io.ReadAll(stream)
-			os.WriteFile("mosquitto.log", b, 0o600)
+			_ = os.WriteFile("mosquitto.log", b, 0o600)
 		}
-		mqttContainer.Terminate(ctx)
+		_ = mqttContainer.Terminate(ctx)
 	}, nil
 }
 
@@ -187,6 +197,6 @@ func newPage(t *testing.T) (playwright.Page, func()) {
 	return page, func() {
 		page.Close()
 		browser.Close()
-		pw.Stop()
+		_ = pw.Stop()
 	}
 }

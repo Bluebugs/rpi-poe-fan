@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -34,15 +36,16 @@ func main() {
 
 	if err := serve("tcp://localhost:1883", id, f, t,
 		func() { _, _ = daemon.SdNotify(false, daemon.SdNotifyReady) },
-		func() {
+		func() error {
 			time.Sleep(interval / 3)
 			_, _ = daemon.SdNotify(false, daemon.SdNotifyWatchdog)
+			return nil
 		}); err != nil {
 		log.Fatal("Failure to serve:", err)
 	}
 }
 
-func serve(server string, id string, f fans.Fan, t cpu.Temp, ready func(), tick func()) error {
+func serve(server string, id string, f fans.Fan, t cpu.Temp, ready func(), tick func() error) error {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(server)
 	opts.SetClientID("sensor" + os.Args[0])
@@ -64,6 +67,11 @@ func serve(server string, id string, f fans.Fan, t cpu.Temp, ready func(), tick 
 			log.Println(err)
 		}
 
-		tick()
+		if err := tick(); err != nil {
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
+			return err
+		}
 	}
 }
