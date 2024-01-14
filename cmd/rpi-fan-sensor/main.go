@@ -27,7 +27,12 @@ func main() {
 		interval = 3 * time.Second
 	}
 
-	if err := serve("tcp://localhost:1883", f, t,
+	id, err := machineid.ProtectedID(os.Args[0])
+	if err != nil {
+		log.Fatal("Failure to get machine id:", err)
+	}
+
+	if err := serve("tcp://localhost:1883", id, f, t,
 		func() { _, _ = daemon.SdNotify(false, daemon.SdNotifyReady) },
 		func() {
 			time.Sleep(interval / 3)
@@ -37,10 +42,10 @@ func main() {
 	}
 }
 
-func serve(server string, f fans.Fan, t cpu.Temp, ready func(), tick func()) error {
+func serve(server string, id string, f fans.Fan, t cpu.Temp, ready func(), tick func()) error {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(server)
-	opts.SetClientID(os.Args[0])
+	opts.SetClientID("sensor" + os.Args[0])
 	opts.AutoReconnect = true
 
 	client := mqtt.NewClient(opts)
@@ -48,11 +53,6 @@ func serve(server string, f fans.Fan, t cpu.Temp, ready func(), tick func()) err
 		return err
 	}
 	defer client.Disconnect(0)
-
-	id, err := machineid.ProtectedID(os.Args[0])
-	if err != nil {
-		return err
-	}
 
 	if err := subscribe(client, id, f); err != nil {
 		return err

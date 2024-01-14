@@ -41,8 +41,7 @@ func publish(client mqtt.Client, id string, t cpu.Temp, fan fans.Fan) error {
 		log.Fatal(err)
 	}
 
-	log.Println("Publishing CPU temperature:", temp, "°C", "Fan speed at", speed, "%")
-
+	log.Println("#", id, "- Publishing CPU temperature:", temp, "°C", "Fan speed at", speed, "%")
 	token := client.Publish("/rpi-poe-fan/"+id+"/state", 0, true, string(js))
 	<-token.Done()
 
