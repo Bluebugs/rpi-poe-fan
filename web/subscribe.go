@@ -27,7 +27,7 @@ type source struct {
 func Listen(server string) (*source, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(server)
-	opts.SetClientID(os.Args[0])
+	opts.SetClientID("web" + os.Args[0])
 	opts.AutoReconnect = true
 
 	client := mqtt.NewClient(opts)
@@ -66,7 +66,7 @@ func (s *source) subscribe(sse *event.Event) error {
 		log.Print("realtime: ", rpi.Realtime)
 
 		changed := false
-		if current, ok := s.rpis[id]; ok && current.Temperature != rpi.Temperature && current.FanSpeed != rpi.FanSpeed {
+		if current, ok := s.rpis[id]; (ok && current.Temperature != rpi.Temperature && current.FanSpeed != rpi.FanSpeed) || !ok {
 			changed = true
 		}
 

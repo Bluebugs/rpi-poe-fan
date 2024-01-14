@@ -33,6 +33,7 @@ func InstantiateTemplate(r *gin.Engine) {
 
 func ServeDynamicPage(log *zerolog.Logger, r *gin.Engine, source *source, sse *event.Event) {
 	r.GET("/", func(c *gin.Context) {
+		log.Info().Int("Entries", len(source.rpis)).Msg("Rendering index page")
 		c.HTML(http.StatusOK, "", templates.Index(source.rpis))
 	})
 	r.GET("/entries", func(c *gin.Context) {
