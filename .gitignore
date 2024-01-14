@@ -23,5 +23,7 @@ cmd/htmx-fan/htmx-fan
 # Go workspace file
 go.work
 
+**/mosquitto.log
+
 cmd/htmx-fan/htmx-fan
 cmd/rpi-fan-sensor/rpi-fan-sensor
