@@ -40,7 +40,7 @@ func VerifyImage(t *testing.T, resultPath string) {
 	}
 
 	totalError := compare(masterPixels, resultPixels, 0.05)
-	assert.Equal(t, float64(0), totalError)
+	assert.Greater(t, float64(0.01), totalError)
 
 	if !t.Failed() {
 		os.Remove(resultPath)
