@@ -22,9 +22,12 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
+    - uses: actions/setup-node@v4
+
     - name: Update coverage
       run: |
         set -e
+        export PLAYWRIGHT_NODEJS_PATH=$(which node)
         go test -tags e2e -covermode=atomic -coverprofile=coverage.out ./...
         coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
         if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; fi
