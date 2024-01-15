@@ -32,12 +32,7 @@ jobs:
         coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
         if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; fi
 
-    - name: Convert coverage to lcov
-      uses: jandelgado/gcov2lcov-action@v1.0.9
-        
     - name: Update PR Coverage
-      uses: coverallsapp/github-action@v2.2.3
+      uses: shogo82148/actions-goveralls@v1.8.0
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        file: coverage.lcov
-        base-path: ./
+        path-to-profile: coverage.out
