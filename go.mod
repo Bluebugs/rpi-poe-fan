@@ -12,7 +12,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/iguanesolutions/go-systemd/v5 v5.1.1
 	github.com/neilotoole/errgroup v0.1.6
-	github.com/playwright-community/playwright-go v0.4101.1
+	github.com/playwright-community/playwright-go v0.4201.0
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.28.0
