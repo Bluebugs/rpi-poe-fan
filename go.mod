@@ -8,7 +8,7 @@ require (
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/gin-contrib/graceful v1.0.1
-	github.com/gin-contrib/logger v1.1.0
+	github.com/gin-contrib/logger v1.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/iguanesolutions/go-systemd/v5 v5.1.1
 	github.com/neilotoole/errgroup v0.1.6
