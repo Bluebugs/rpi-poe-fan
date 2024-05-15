@@ -3,7 +3,7 @@ module github.com/Bluebugs/rpi-poe-fan
 go 1.21
 
 require (
-	github.com/a-h/templ v0.2.648
+	github.com/a-h/templ v0.2.680
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/eclipse/paho.mqtt.golang v1.4.3
@@ -26,7 +26,7 @@ require (
 	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/containerd/containerd v1.7.12 // indirect
@@ -97,7 +97,7 @@ require (
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
-	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
