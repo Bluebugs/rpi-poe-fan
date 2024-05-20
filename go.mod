@@ -10,7 +10,7 @@ require (
 	github.com/gin-contrib/graceful v1.0.2
 	github.com/gin-contrib/logger v1.1.2
 	github.com/gin-gonic/gin v1.10.0
-	github.com/iguanesolutions/go-systemd/v5 v5.1.1
+	github.com/iguanesolutions/go-systemd/v5 v5.2.0
 	github.com/neilotoole/errgroup v0.1.6
 	github.com/playwright-community/playwright-go v0.4201.1
 	github.com/rs/zerolog v1.32.0
@@ -102,7 +102,7 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d // indirect
 	google.golang.org/grpc v1.58.3 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
