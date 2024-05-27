@@ -13,7 +13,7 @@ require (
 	github.com/iguanesolutions/go-systemd/v5 v5.2.0
 	github.com/neilotoole/errgroup v0.1.6
 	github.com/playwright-community/playwright-go v0.4201.1
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.31.0
 	github.com/urfave/cli/v2 v2.27.2
